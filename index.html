@@ -1,1 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>PC Simulator - Extreme Edition</title>
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.1);
+            --accent: #00d2ff;
+        }
+        body {
+            margin: 0;
+            background: #050505;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+        /* Корпус ПК */
+        #pc-case {
+            width: 400px;
+            height: 500px;
+            border: 4px solid #333;
+            margin-top: 50px;
+            position: relative;
+            background: #111;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.1);
+        }
+        .slot {
+            border: 2px dashed #444;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #666;
+            transition: 0.3s;
+        }
+        .slot.filled { border-color: var(--accent); color: var(--accent); background: rgba(0, 210, 255, 0.1); }
+        
+        /* Детали */
+        #motherboard { top: 50px; left: 50px; width: 300px; height: 350px; }
+        #cpu { top: 120px; left: 160px; width: 60px; height: 60px; z-index: 2; }
+        #gpu { top: 250px; left: 70px; width: 200px; height: 40px; z-index: 3; }
 
+        /* Инвентарь */
+        #inventory {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            background: var(--glass);
+            padding: 15px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .part {
+            padding: 10px 20px;
+            background: #222;
+            border: 1px solid var(--accent);
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .part:hover { background: var(--accent); color: black; }
+
+        /* Экран монитора */
+        #monitor {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            z-index: 100;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #boot-text { font-family: 'Consolas', monospace; color: #00ff00; }
+    </style>
+</head>
+<body>
+
+    <h1>Симулятор Сборки ПК</h1>
+    
+    <div id="pc-case">
+        <div id="motherboard" class="slot">Материнская плата</div>
+        <div id="cpu" class="slot">CPU</div>
+        <div id="gpu" class="slot">GPU</div>
+    </div>
+
+    <div id="inventory">
+        <div class="part" onclick="install('motherboard')">Материнка Z-490</div>
+        <div class="part" onclick="install('cpu')">Core i9-12900K</div>
+        <div class="part" onclick="install('gpu')">RTX 4090</div>
+        <div class="part" onclick="bootPC()" style="border-color: #00ff00;">ВКЛЮЧИТЬ</div>
+    </div>
+
+    <div id="monitor">
+        <div id="boot-text"></div>
+    </div>
+
+    <script>
+        const installed = { motherboard: false, cpu: false, gpu: false };
+
+        function install(partId) {
+            if (partId === 'cpu' && !installed.motherboard) {
+                alert("Сначала установи материнскую плату!");
+                return;
+            }
+            installed[partId] = true;
+            document.getElementById(partId).classList.add('filled');
+            document.getElementById(partId).innerText = partId.toUpperCase() + " УСТАНОВЛЕН";
+        }
+
+        function bootPC() {
+            if (!installed.motherboard || !installed.cpu || !installed.gpu) {
+                alert("ПК не включается. Проверь комплектующие!");
+                return;
+            }
+
+            const monitor = document.getElementById('monitor');
+            const bootText = document.getElementById('boot-text');
+            monitor.style.display = 'flex';
+
+            const lines = [
+                "BIOS Version 2.04.1...",
+                "Checking RAM...",
+                "Detecting CPU: i9-12900K @ 5.2GHz",
+                "Detecting GPU: NVIDIA RTX 4090",
+                "Loading OS Kernel...",
+                "SoberOS System Loaded Successfully!",
+                "Welcome, Developer."
+            ];
+
+            let i = 0;
+            const interval = setInterval(() => {
+                bootText.innerHTML += `<div>${lines[i]}</div>`;
+                i++;
+                if (i >= lines.length) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        alert("Система запущена! Теперь ты можешь использовать терминал.");
+                        // Здесь можно перенаправить на код твоей виртуальной ОС
+                    }, 1000);
+                }
+            }, 600);
+        }
+    </script>
+</body>
+</html>
